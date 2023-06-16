@@ -2,6 +2,8 @@ const express = require('express')
 require('dotenv').config()
 const cors = require('cors')
 const app = express()
+// create an instance of 'jsonwebtoken'
+const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 // PORT to listen to the response
@@ -28,7 +30,7 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const registeredUsersCollection = client.db('powerPlaySports').collection('users');
+    const usersCollection = client.db('powerPlaySports').collection('users');
     const classesCollection = client.db('powerPlaySports').collection('allClasses');
     const instructorCollection = client.db('powerPlaySports').collection('instructors');
     const reviewsCollection = client.db('powerPlaySports').collection('reviews');
@@ -36,20 +38,34 @@ async function run() {
     // new user registration related apis
     // store or insert user name and password in the database // save the user name, and email to the database ONLY when he doesn't already exist
     app.post('/users', async (req, res) => {
-      console.log('registeredUsersCollection is getting hit')
+      console.log('usersCollection is getting hit')
       const user = req.body;
       const query = { email: user.email }
       // check whether the user already exists
-      const existingUser = await registeredUsersCollection.findOne(query)
+      const existingUser = await usersCollection.findOne(query)
       if (existingUser) {
         return res.send({ message: 'user already exists' })
       }
-      const result = await registeredUsersCollection.insertOne(user);
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     })
 
-    // jwt related apis
+    // admin related apis
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      //  set the query to find relevant user based on the decoded email
+      const query = { email: email };
+      // find the user based on the email
+      const user = await usersCollection.findOne(query)
+      // set condition to verify whether the user is an admin
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: 'forbidden access' })
+      }
+      next()
+    }
 
+    // jwt related apis
     // jwt
     app.post('/jwt', (req, res) => {
       const user = req.body;
