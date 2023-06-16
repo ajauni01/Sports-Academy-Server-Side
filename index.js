@@ -31,6 +31,7 @@ async function run() {
     const registeredUsersCollection = client.db('powerPlaySports').collection('users');
     const classesCollection = client.db('powerPlaySports').collection('allClasses');
     const instructorCollection = client.db('powerPlaySports').collection('instructors');
+    const reviewsCollection = client.db('powerPlaySports').collection('reviews');
 
     // new user registration related apis
     // store or insert user name and password in the database // save the user name, and email to the database ONLY when he doesn't already exist
@@ -71,6 +72,12 @@ async function run() {
       res.send(result)
     })
 
+    // reviews related apis
+    app.get('/reviews', async (req, res) => {
+      const cursor = reviewsCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
