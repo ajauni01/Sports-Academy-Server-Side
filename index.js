@@ -48,6 +48,16 @@ async function run() {
       res.send(result);
     })
 
+    // jwt related apis
+
+    // jwt
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      console.log('jwt user', user)
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '5000h' })
+      res.send({ token })
+    })
+
     // popular class related apis
     app.get('/popularClasses', async (req, res) => {
       const query = {}
