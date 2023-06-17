@@ -40,15 +40,23 @@ async function run() {
     app.post('/users', async (req, res) => {
       console.log('usersCollection is getting hit')
       const user = req.body;
-      const query = { email: user.email }
-      // check whether the user already exists
-      const existingUser = await usersCollection.findOne(query)
+
+      // Check whether the user already exists
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
       if (existingUser) {
-        return res.send({ message: 'user already exists' })
+        return res.send({ message: 'User already exists' });
       }
-      const result = await usersCollection.insertOne(user);
+
+      // Update the user object with the 'role' field
+      const newUser = {
+        ...user,
+        role: 'student', // Set the role to 'student' by default
+      };
+      const result = await usersCollection.insertOne(newUser);
       res.send(result);
-    })
+    });
+
 
     // user authorization related apis
     app.get('/userAuthorization', async (req, res) => {
@@ -67,6 +75,13 @@ async function run() {
         res.send({ role: 'student' });
       }
     });
+
+    // find all the registered users
+    app.get('/allUsers', async (req, res) => {
+      const cursor = usersCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
     // jwt related apis
     // jwt
