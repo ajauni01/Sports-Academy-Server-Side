@@ -4,7 +4,7 @@ const cors = require('cors')
 const app = express()
 // create an instance of 'jsonwebtoken'
 const jwt = require('jsonwebtoken')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // PORT to listen to the response
 const port = process.env.PORT || 5000;
@@ -37,8 +37,9 @@ async function run() {
 
     // new user registration related apis
     // store or insert user name and password in the database // save the user name, and email to the database ONLY when he doesn't already exist
+    const { ObjectId } = require('mongodb');
+
     app.post('/users', async (req, res) => {
-      console.log('usersCollection is getting hit')
       const user = req.body;
 
       // Check whether the user already exists
@@ -48,14 +49,17 @@ async function run() {
         return res.send({ message: 'User already exists' });
       }
 
-      // Update the user object with the 'role' field
+      // Update the user object with the 'role' and 'userID' fields
       const newUser = {
         ...user,
-        role: 'student', // Set the role to 'student' by default
-      };
+        role: 'student' // Set the role to 'student' by default
+      }
+
       const result = await usersCollection.insertOne(newUser);
       res.send(result);
     });
+
+
 
 
     // user authorization related apis
@@ -100,7 +104,7 @@ async function run() {
     // update the user's role to an 'instructor'
     app.patch('/allUsers/instructor/:id', async (req, res) => {
       const id = req.params.id;
-      console.log('admin api is getting hit', id)
+      console.log('instructor api is getting hit', id)
       const filter = { _id: new ObjectId(id) }
       const updateDoc = {
         $set: {
@@ -110,7 +114,6 @@ async function run() {
       const result = await usersCollection.updateOne(filter, updateDoc)
       res.send(result)
     })
-
 
 
     // jwt related apis
