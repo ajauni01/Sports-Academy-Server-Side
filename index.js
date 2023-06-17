@@ -83,11 +83,26 @@ async function run() {
       res.send(result)
     })
 
+    // update the user's role to 'admin'
+    app.patch('/allUsers/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log('admin api is getting hit', id)
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        },
+      }
+      const result = await usersCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
+
+
     // jwt related apis
     // jwt
     app.post('/jwt', (req, res) => {
       const user = req.body;
-      console.log('jwt user', user)
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '5000h' })
       res.send({ token })
     })
