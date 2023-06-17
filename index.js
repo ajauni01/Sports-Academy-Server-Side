@@ -175,10 +175,16 @@ async function run() {
 
     // add class api
     app.post('/addClass', async (req, res) => {
-      const user = req.body;
-      const result = await addClassCollection.insertOne(user);
-      res.send(result);
-    })
+      const newClass = req.body;
+      newClass.status = 'pending';
+      try {
+        const result = await addClassCollection.insertOne(newClass);
+        res.send(result);
+      } catch (error) {
+        console.error('Error inserting newClass into the database:', error);
+        res.status(500).send('An error occurred while inserting newClass into the database');
+      }
+    });
 
     // popular class related apis
     app.get('/popularClasses', async (req, res) => {
