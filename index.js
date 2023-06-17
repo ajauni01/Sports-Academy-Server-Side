@@ -34,6 +34,7 @@ async function run() {
     const classesCollection = client.db('powerPlaySports').collection('allClasses');
     const instructorCollection = client.db('powerPlaySports').collection('instructors');
     const reviewsCollection = client.db('powerPlaySports').collection('reviews');
+    const addClassCollection = client.db('powerPlaySports').collection('addClass');
 
     // new user registration related apis
     // store or insert user name and password in the database // save the user name, and email to the database ONLY when he doesn't already exist
@@ -170,6 +171,13 @@ async function run() {
       const user = await usersCollection.findOne(query);
       const result = { admin: user?.role === 'admin' }
       res.send(result)
+    })
+
+    // add class api
+    app.post('/addClass', async (req, res) => {
+      const user = req.body;
+      const result = await addClassCollection.insertOne(user);
+      res.send(result);
     })
 
     // popular class related apis
