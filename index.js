@@ -83,7 +83,7 @@ async function run() {
       res.send(result)
     })
 
-    // update the user's role to 'admin'
+    // update the user's role to an 'admin'
     app.patch('/allUsers/admin/:id', async (req, res) => {
       const id = req.params.id;
       console.log('admin api is getting hit', id)
@@ -91,6 +91,20 @@ async function run() {
       const updateDoc = {
         $set: {
           role: 'admin'
+        },
+      }
+      const result = await usersCollection.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
+    // update the user's role to an 'instructor'
+    app.patch('/allUsers/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log('admin api is getting hit', id)
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = {
+        $set: {
+          role: 'instructor'
         },
       }
       const result = await usersCollection.updateOne(filter, updateDoc)
