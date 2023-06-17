@@ -50,20 +50,23 @@ async function run() {
       res.send(result);
     })
 
-    // admin related apis
-    // verify admin
-    const verifyAdmin = async (req, res, next) => {
-      const email = req.decoded.email;
-      //  set the query to find relevant user based on the decoded email
-      const query = { email: email };
-      // find the user based on the email
-      const user = await usersCollection.findOne(query)
-      // set condition to verify whether the user is an admin
-      if (user?.role !== 'admin') {
-        return res.status(403).send({ error: true, message: 'forbidden access' })
+    // user authorization related apis
+    app.get('/userAuthorization', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
       }
-      next()
-    }
+      // find the user based on the email
+      const user = await usersCollection.findOne(query);
+      // set condition to verify whether the user is an admin, student, or instructor
+      if (user?.role === 'admin') {
+        res.send({ role: 'admin' });
+      } else if (user?.role === 'instructor') {
+        res.send({ role: 'instructor' });
+      } else {
+        res.send({ role: 'student' });
+      }
+    });
 
     // jwt related apis
     // jwt
