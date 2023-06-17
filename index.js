@@ -158,14 +158,13 @@ async function run() {
     }
 
     //  final admin verification
-    app.get('/users/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       //  console.log('users/admin/:email is getting hit')
       // revoke the user access if the email does not match
       if (req.decoded.email !== email) {
         res.send({ admin: false })
       }
-
       const query = { email: email }
       // find the relevant user based on the given email
       const user = await usersCollection.findOne(query);
