@@ -124,6 +124,55 @@ async function run() {
       res.send({ token })
     })
 
+    // verifyJWT
+    const verifyJWT = (req, res, next) => {
+      const authorization = req.headers.authorization;
+      // revoke the user access if the user is not found
+      if (!authorization) {
+        return res.status(401).send({ error: true, message: 'unauthorized access' })
+      }
+      // find the token using the 'split' operation to exclude it from the bearer
+      const token = authorization.split(' ')[1]
+      // verify the token
+      jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+        if (error) {
+          res.status(403).send({ error: true, message: 'access revoked / unauthorized access' })
+        }
+        req.decoded = decoded;
+        next()
+      })
+    }
+
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      //  set the query to find relevant user based on the decoded email
+      const query = { email: email };
+      // find the user based on the email
+      const user = await usersCollection.findOne(query)
+      // set condition to verify whether the user is an admin
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: 'forbidden access' })
+      }
+      next()
+    }
+
+    //  final admin verification
+    app.get('/users/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
+      const email = req.params.email;
+      //  console.log('users/admin/:email is getting hit')
+      // revoke the user access if the email does not match
+      if (req.decoded.email !== email) {
+        res.send({ admin: false })
+      }
+
+      const query = { email: email }
+      // find the relevant user based on the given email
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === 'admin' }
+      res.send(result)
+    })
+
     // popular class related apis
     app.get('/popularClasses', async (req, res) => {
       const query = {}
