@@ -215,6 +215,7 @@ app.get('/popularClasses', async (req, res) => {
   res.send(result)
 })
 
+
 // popular instructor related apis
 app.get('/instructors', async (req, res) => {
   const query = {}
